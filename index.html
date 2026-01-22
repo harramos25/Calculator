@@ -66,18 +66,17 @@
             cursor: pointer;
         }
 
-        .btn:hover .btnFace {
-            filter: brightness(1.03);
+        .btn:active .btnContent {
+            transform: translateY(4px);
         }
 
-        .btn:active .btnShadow {
-            transform: translateY(7px);
-            opacity: .9;
+        /* Ensure text inside content moves with it */
+        .btnContent text {
+            pointer-events: none;
+            will-change: transform;
         }
 
-        .btn:active .btnFace {
-            transform: translateY(7px);
-        }
+        /* Keep shadow stable for "press" effect */
 
         /* modal entrance */
         .popIn {
@@ -106,6 +105,11 @@
             50% {
                 opacity: .35;
             }
+        }
+
+        /* Tipped Badge */
+        #tippedBadge {
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
     </style>
 </head>
@@ -160,6 +164,10 @@
                     <stop offset="0" stop-color="#ffffff" />
                     <stop offset="1" stop-color="#fff3fb" />
                 </linearGradient>
+
+                <clipPath id="screenClip">
+                    <rect x="80" y="144" width="196" height="76" rx="12" />
+                </clipPath>
             </defs>
 
             <!-- HEADER TEXT & BANNER -->
@@ -169,6 +177,13 @@
                 <rect x="-96" y="-20" width="192" height="34" rx="8" fill="#c61d6a" stroke="#fff" stroke-width="2" />
                 <text x="0" y="8" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="16"
                     fill="#fff" opacity="1">CALCULATOR</text>
+            </g>
+
+            <!-- TIPPED BADGE (Initially Hidden) -->
+            <g id="tippedBadge" transform="translate(280, 50) rotate(15)" style="display:none;">
+                <rect x="-34" y="-12" width="68" height="24" rx="6" fill="#40d479" stroke="#fff" stroke-width="2" />
+                <text x="0" y="5" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="8"
+                    fill="#fff">Tipped ✅</text>
             </g>
 
             <!-- CALC FRAME SHADOW -->
@@ -204,10 +219,10 @@
             <rect x="80" y="144" width="196" height="76" rx="12" fill="url(#scan)" opacity="0.35" />
 
             <!-- Expression / Result (SVG text updated by JS) -->
-            <text id="exprText" x="92" y="176" font-family="&quot;Press Start 2P&quot;" font-size="16"
-                fill="#4b0030">0</text>
-            <text id="resText" x="268" y="210" text-anchor="end" font-family="&quot;Press Start 2P&quot;" font-size="18"
-                fill="var(--px3)"></text>
+            <text id="exprText" x="268" y="176" text-anchor="end" clip-path="url(#screenClip)"
+                font-family="&quot;Press Start 2P&quot;" font-size="16" fill="#4b0030">0</text>
+            <text id="resText" x="268" y="210" text-anchor="end" clip-path="url(#screenClip)"
+                font-family="&quot;Press Start 2P&quot;" font-size="18" fill="var(--px3)"></text>
 
             <!-- Processing overlay inside screen -->
             <g id="processingLayer" style="display:none;">
@@ -254,11 +269,11 @@
                     <rect x="56" y="164" width="232" height="292" rx="10" fill="transparent"
                         stroke="rgba(255,90,165,0.20)" stroke-width="4" />
 
-                    <text x="172" y="184" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="12"
+                    <text x="172" y="184" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="10"
                         fill="#4b0030">
-                        UNLOCK YOUR ANSWER ✨
+                        UNLOCK YOUR ANSWER
                     </text>
-                    <text x="172" y="210" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="12"
+                    <text x="172" y="210" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="9"
                         fill="#4b0030" opacity="0.9">
                         Pick a payment method!
                     </text>
@@ -280,33 +295,54 @@
 
             <!-- TIP MODAL (SVG) -->
             <g id="tipLayer" style="display:none;">
-                <!-- dim background (huge to cover screen) -->
+                <!-- dim background -->
                 <rect x="-2000" y="-2000" width="5000" height="5000" fill="rgba(20,0,15,0.45)" />
+
                 <!-- tip panel shadow -->
-                <rect x="44" y="152" width="272" height="332" rx="16" fill="var(--frameDark)" />
+                <rect x="44" y="102" width="272" height="360" rx="16" fill="var(--frameDark)" />
+
                 <!-- tip panel -->
                 <g class="popIn">
-                    <rect x="36" y="144" width="272" height="332" rx="16" fill="#ffe5f2" stroke="var(--frame)"
+                    <rect x="36" y="94" width="272" height="360" rx="16" fill="#ffe5f2" stroke="var(--frame)"
                         stroke-width="4" />
-                    <rect x="48" y="156" width="248" height="308" rx="12" fill="transparent"
+                    <!-- Inner borders -->
+                    <rect x="48" y="106" width="248" height="336" rx="12" fill="transparent"
                         stroke="rgba(255,255,255,0.45)" stroke-width="4" />
-                    <rect x="56" y="164" width="232" height="292" rx="10" fill="transparent"
-                        stroke="rgba(255,90,165,0.20)" stroke-width="4" />
 
-                    <text x="172" y="200" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="14"
-                        fill="#4b0030">TIP JAR 💖</text>
+                    <!-- Header -->
+                    <text x="172" y="136" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="12"
+                        fill="#4b0030">Send a tip 💗</text>
 
-                    <!-- Tip Options -->
-                    <g id="tipOptions"></g>
+                    <!-- QR Code Container -->
+                    <rect x="92" y="156" width="160" height="160" rx="8" fill="#fff" stroke="rgba(0,0,0,0.1)"
+                        stroke-width="2" />
+                    <image id="tipQR" x="97" y="161" width="150" height="150" href="images/Tip_50.jpg"
+                        preserveAspectRatio="xMidYMid slice" />
 
-                    <!-- Close Tip -->
-                    <g class="btn" id="closeTipBtn">
-                        <rect class="btnShadow" x="218" y="440" width="78" height="30" rx="8"
-                            fill="rgba(198,29,106,.35)" />
-                        <rect class="btnFace" x="210" y="432" width="78" height="30" rx="8" fill="url(#btnGrad)"
-                            stroke="var(--frame)" stroke-width="3" />
-                        <text x="249" y="453" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
-                            font-size="10" fill="#4b0030">Close</text>
+                    <!-- Amount Selectors -->
+                    <g id="tipAmounts" transform="translate(56, 330)"></g>
+
+                    <!-- Action Buttons -->
+                    <g transform="translate(0, 390)">
+                        <!-- Cancel (X) -->
+                        <g class="btn" id="tipCloseBtn" transform="translate(66, 0)">
+                            <rect class="btnShadow" x="4" y="4" width="90" height="34" rx="8"
+                                fill="rgba(198,29,106,.35)" />
+                            <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#ffb3da"
+                                stroke="var(--frame)" stroke-width="3" />
+                            <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                                font-size="10" fill="#4b0030">X</text>
+                        </g>
+
+                        <!-- Done -->
+                        <g class="btn" id="tipDoneBtn" transform="translate(186, 0)">
+                            <rect class="btnShadow" x="4" y="4" width="90" height="34" rx="8"
+                                fill="rgba(198,29,106,.35)" />
+                            <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#40d479"
+                                stroke="var(--frame)" stroke-width="3" />
+                            <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                                font-size="10" fill="#fff">Done</text>
+                        </g>
                     </g>
                 </g>
             </g>
@@ -398,6 +434,9 @@
                 fill: "rgba(198,29,106,.35)"
             });
 
+            // Group moving content
+            const content = el("g", { class: "btnContent" });
+
             const faceFill =
                 label === "=" ? "url(#eqGrad)" :
                     (type === "op" || type === "tip") ? "#ffc1e1" :
@@ -427,7 +466,8 @@
                 "text-anchor": "middle",
                 "font-family": "\"Press Start 2P\"",
                 "font-size": (label.length >= 3 ? "12" : "16"),
-                fill: "var(--ink)"
+                fill: "var(--ink)",
+                style: "pointer-events: none;" // Ensure clicks go to group
             });
 
             let shownLabel = label;
@@ -438,10 +478,12 @@
 
             text.textContent = shownLabel;
 
+            content.appendChild(face);
+            content.appendChild(hi);
+            content.appendChild(text);
+
             g.appendChild(shadow);
-            g.appendChild(face);
-            g.appendChild(hi);
-            g.appendChild(text);
+            g.appendChild(content);
 
             g.addEventListener("click", () => handleKey(label));
             keys.appendChild(g);
@@ -485,9 +527,11 @@
                 return;
             }
 
-            // normal input
-            if (expr === "0" && /[0-9.]/.test(label)) expr = (label === ".") ? "0." : label;
-            else expr += label;
+            // normal input, limit length to 24 (simulates scrolling)
+            if (expr.length < 24) {
+                if (expr === "0" && /[0-9.]/.test(label)) expr = (label === ".") ? "0." : label;
+                else expr += label;
+            }
 
             render();
         }
@@ -536,10 +580,10 @@
         const payOptions = $("payOptions");
 
         const options = [
-            { id: "gcash", label: "GCash", sub: "09XX-XXX-XXXX", tag: "FASTEST", color: "#4aa8ff" },
-            { id: "card", label: "Credit Card", sub: "VISA / MC", tag: "CARD", color: "#ffb167" },
-            { id: "maya", label: "Maya", sub: "tap to “pay”", tag: "CUTE", color: "#40d479" },
-            { id: "apple", label: "Apple Pay", sub: "FaceID confirmed", tag: "APPLE", color: "#333333" }
+            { id: "gcash", label: "GCash", sub: "0912-345-6789", tag: "FASTEST", img: "images/GCash.png" },
+            { id: "card", label: "Credit Card", sub: "VISA / MC", tag: "CARD", img: "images/credit.png" },
+            { id: "maya", label: "Maya", sub: "tap to “pay”", tag: "CUTE", img: "images/maya.png" },
+            { id: "apple", label: "Apple Pay", sub: "FaceID confirmed", tag: "APPLE", img: "images/apple.png" }
         ];
 
         function addPayOption(o, i) {
@@ -553,7 +597,12 @@
 
             // pixel icon block
             const iconShadow = el("rect", { x: "12", y: "10", width: "22", height: "22", rx: "4", fill: "rgba(0,0,0,0.12)" });
-            const icon = el("rect", { x: "10", y: "8", width: "22", height: "22", rx: "4", fill: o.color, stroke: "rgba(0,0,0,0.10)", "stroke-width": "2" });
+            // Image icon
+            const icon = el("image", {
+                x: "10", y: "8", width: "22", height: "22",
+                href: o.img,
+                preserveAspectRatio: "xMidYMid meet" // ensure logo fits
+            });
 
             // texts
             const t1 = el("text", { x: "44", y: "22", "font-family": "\"Press Start 2P\"", "font-size": "10", fill: "#4b0030" });
@@ -563,9 +612,10 @@
             t2.textContent = o.sub;
 
             // tag pill
-            const tagShadow = el("rect", { x: "186", y: "12", width: "50", height: "16", rx: "6", fill: "rgba(0,0,0,0.12)" });
-            const tag = el("rect", { x: "184", y: "10", width: "50", height: "16", rx: "6", fill: "#ffe0f0", stroke: "rgba(0,0,0,0.10)", "stroke-width": "2" });
-            const tagText = el("text", { x: "209", y: "22", "text-anchor": "middle", "font-family": "\"Press Start 2P\"", "font-size": "8", fill: "#4b0030" });
+            // Widened to 60 to fit "FASTEST", shifted X left to 174 to stay inside button
+            const tagShadow = el("rect", { x: "176", y: "12", width: "60", height: "16", rx: "6", fill: "rgba(0,0,0,0.12)" });
+            const tag = el("rect", { x: "174", y: "10", width: "60", height: "16", rx: "6", fill: "#ffe0f0", stroke: "rgba(0,0,0,0.10)", "stroke-width": "2" });
+            const tagText = el("text", { x: "204", y: "22", "text-anchor": "middle", "font-family": "\"Press Start 2P\"", "font-size": "8", fill: "#4b0030" });
             tagText.textContent = o.tag;
 
             g.appendChild(shadow);
@@ -584,86 +634,87 @@
 
         options.forEach(addPayOption);
 
-        // --- TIP OPTIONS ---
-        const tipOptionsContainer = $("tipOptions");
-        const tipLevels = [
-            { amt: "5", label: "Cute", emoji: "🍬" },
-            { amt: "20", label: "Sweet", emoji: "🍰" },
-            { amt: "50", label: "Bestie", emoji: "💖" },
-            { amt: "100", label: "Legend", emoji: "👑" }
-        ];
+        // --- REAL TIP LOGIC ---
+        const tipAmountsContainer = $("tipAmounts");
+        const tipQR = $("tipQR");
+        const tippedBadge = $("tippedBadge");
 
-        function addTipOption(t, i) {
-            const x = 60, y = 240 + i * 48; // a bit taller spacing
+        const tipAmounts = [5, 20, 50, 100];
+        let currentTip = 50;
 
-            const g = el("g", { class: "btn", transform: `translate(${x} ${y})` });
+        function renderTipAmounts() {
+            tipAmountsContainer.innerHTML = "";
+            tipAmounts.forEach((amt, i) => {
+                const x = i * 60;
+                const isSel = (amt === currentTip);
 
-            // Background
-            const shadow = el("rect", { class: "btnShadow", x: "8", y: "8", width: "240", height: "38", rx: "8", fill: "rgba(198,29,106,.35)" });
-            const face = el("rect", { class: "btnFace", x: "0", y: "0", width: "240", height: "38", rx: "8", fill: "rgba(255,255,255,0.9)", stroke: "var(--frame)", "stroke-width": "3" });
+                const g = el("g", { class: "btn", transform: `translate(${x} 0)` });
 
-            // Emoji circle
-            const iconBg = el("circle", { cx: "26", cy: "19", r: "14", fill: "#ffe5f2" });
-            const icon = el("text", { x: "26", y: "24", "text-anchor": "middle", "font-size": "16" });
-            icon.textContent = t.emoji;
+                // Pill shape
+                const bg = el("rect", {
+                    width: "52", height: "30", rx: "8",
+                    fill: isSel ? "#c61d6a" : "#fff",
+                    stroke: "#c61d6a", "stroke-width": "2"
+                });
 
-            // Amount
-            const tAmt = el("text", { x: "50", y: "25", "font-family": "\"Press Start 2P\"", "font-size": "12", fill: "#c61d6a" });
-            tAmt.textContent = "P" + t.amt;
+                const txt = el("text", {
+                    x: "26", y: "20", "text-anchor": "middle",
+                    "font-family": "\"Press Start 2P\"", "font-size": "10",
+                    fill: isSel ? "#fff" : "#c61d6a"
+                });
+                txt.textContent = amt;
 
-            // Label
-            const tLbl = el("text", { x: "230", y: "25", "text-anchor": "end", "font-family": "\"Press Start 2P\"", "font-size": "10", fill: "#4b0030", opacity: "0.8" });
-            tLbl.textContent = t.label;
-
-            g.appendChild(shadow);
-            g.appendChild(face);
-            g.appendChild(iconBg);
-            g.appendChild(icon);
-            g.appendChild(tAmt);
-            g.appendChild(tLbl);
-
-            g.addEventListener("click", () => fakeTip(t.amt));
-            tipOptionsContainer.appendChild(g);
+                g.appendChild(bg);
+                g.appendChild(txt);
+                g.addEventListener("click", () => setTipAmount(amt));
+                tipAmountsContainer.appendChild(g);
+            });
         }
 
-        tipLevels.forEach(addTipOption);
+        function setTipAmount(amt) {
+            currentTip = amt;
+            // Update QR
+            tipQR.setAttribute("href", `images/Tip_${amt}.jpg`);
+            // Re-render buttons to update highlights
+            renderTipAmounts();
+        }
 
-        // Tip Modal Logic
         function openTipModal() {
+            setTipAmount(50); // reset to default
             tipLayer.style.display = "block";
         }
 
-        $("closeTipBtn").addEventListener("click", () => {
+        // Close (X)
+        $("tipCloseBtn").addEventListener("click", () => {
             tipLayer.style.display = "none";
         });
 
-        async function fakeTip(amount) {
+        // Done (Checkmark)
+        $("tipDoneBtn").addEventListener("click", () => {
             tipLayer.style.display = "none";
 
-            // processing
-            processingLayer.style.display = "block";
-            setResult("Tipping...");
-            await new Promise(r => setTimeout(r, 1200));
-            processingLayer.style.display = "none";
-
-            // celebration
-            setResult("");
-
-            // Update toast text for tip
+            // Celebration
             const toastLines = celebrateLayer.querySelectorAll("text");
-            toastLines[0].textContent = `Thank you bestie! P${amount} tipped 💗`;
-            toastLines[1].textContent = "You are amazing!";
+            toastLines[0].textContent = "Thank you bestie!";
+            toastLines[1].textContent = "Tipped ✅";
 
             burstConfetti();
             celebrateLayer.style.display = "block";
+            tippedBadge.style.display = "block"; // Show badge on calc
 
             setTimeout(() => {
                 celebrateLayer.style.display = "none";
-                // Restore default toast text
+                // Restore default toast
                 toastLines[0].textContent = "Thank you bestie! 💗";
                 toastLines[1].textContent = "Answer unlocked";
             }, 3000);
+        });
+
+        /*
+        async function fakeTip(amount) {
+            // ... Removed old fake tip logic ...
         }
+        */
 
         // close modal
         $("closeModalBtn").addEventListener("click", () => {
