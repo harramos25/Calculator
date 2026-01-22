@@ -1,0 +1,648 @@
+:root {
+  --bg1: #ffd1e6;
+  --bg2: #ffb3d9;
+  --card: #fff0f7;
+  --border: #ff5aa5;
+  --border2: #c61d6a;
+  --btn: #ff87c2;
+  --btn2: #ff4fa3;
+  --text: #4b0030;
+  --white: #fff;
+  --shadow: rgba(120, 0, 70, 0.25);
+
+  /* --- PIXEL / RETRO TUNING --- */
+  --px-border: #ff5aa5;
+  --px-border-dark: #b91563;
+  --px-surface: #ffe6f3;
+  --px-surface2: #ffb0d4;
+  --px-btn: #ff86c3;
+  --px-btn2: #ff64b4;
+  --px-text: #4b0030;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+  color: var(--text);
+  font-family: "VT323", monospace;
+  overflow-x: hidden;
+}
+
+/* Reduced width for smaller screens/preference */
+.wrap {
+  width: min(350px, 90vw);
+  padding: 18px;
+}
+
+.title {
+  font-family: "Press Start 2P", system-ui;
+  font-size: 12px;
+  /* Slightly smaller */
+  line-height: 1.4;
+  text-align: center;
+  margin: 0 0 14px;
+  text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.85);
+}
+
+.calc {
+  border-radius: 14px;
+  /* less round */
+  background: linear-gradient(180deg, #fff2fa, #ffd0e6);
+  border: 4px solid var(--px-border);
+  box-shadow:
+    10px 10px 0 var(--px-border-dark),
+    0 0 0 4px rgba(255, 255, 255, .35) inset;
+  animation: floaty 3.8s ease-in-out infinite;
+  transform-origin: center;
+  padding: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* little sparkles (pure CSS) */
+.sparkles::before,
+.sparkles::after {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, .85) 0 2px, transparent 3px) 0 0/80px 80px,
+    radial-gradient(circle, rgba(255, 255, 255, .65) 0 1.5px, transparent 3px) 20px 20px/90px 90px;
+  opacity: .35;
+  pointer-events: none;
+  animation: drift 7s linear infinite;
+  transform: rotate(6deg);
+  z-index: 1;
+}
+
+.sparkles::after {
+  opacity: .22;
+  animation-duration: 11s;
+  transform: rotate(-7deg);
+}
+
+@keyframes drift {
+  from {
+    transform: translateY(0) rotate(6deg);
+  }
+
+  to {
+    transform: translateY(50px) rotate(6deg);
+  }
+}
+
+.sticker {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #fff;
+  border: 3px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 6px 6px 0 var(--px-border-dark);
+  padding: 10px 12px;
+  font-family: "Press Start 2P";
+  font-size: 10px;
+  transform: rotate(10deg);
+  z-index: 5;
+}
+
+.sticker span {
+  display: block;
+}
+
+.sticker .tiny {
+  font-size: 9px;
+  opacity: .9;
+}
+
+/* Screen looks more like pixel display */
+.display {
+  height: 76px;
+  border-radius: 12px;
+  border: 3px solid var(--px-border);
+  background:
+    linear-gradient(180deg, #ffffff, #fff3fb);
+  box-shadow:
+    0 0 0 3px rgba(255, 90, 165, .12) inset,
+    6px 6px 0 rgba(185, 21, 99, .35);
+  position: relative;
+  overflow: hidden;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  z-index: 2;
+}
+
+/* subtle scanline grid (pixel vibe) */
+.display::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom,
+      rgba(255, 90, 165, .08) 1px,
+      transparent 1px);
+  background-size: 100% 8px;
+  opacity: .35;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+.expr {
+  font-size: 20px;
+  /* Smaller */
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+  z-index: 2;
+}
+
+.result {
+  font-size: 26px;
+  /* Smaller */
+  font-weight: 800;
+  color: #8a004f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  /* Slightly tighter gap */
+  position: relative;
+  z-index: 2;
+}
+
+/* Buttons more “pixel 3D” */
+button.key {
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  /* Smaller font */
+  color: var(--text);
+  transition: transform .06s ease, box-shadow .06s ease, filter .2s ease;
+  user-select: none;
+
+  border-radius: 12px;
+  /* less round */
+  border: 3px solid var(--px-border);
+  background: linear-gradient(180deg, #ffe9f5, var(--px-btn));
+  box-shadow:
+    0 7px 0 var(--px-border-dark),
+    /* hard shadow */
+    0 0 0 3px rgba(255, 255, 255, .25) inset;
+  position: relative;
+  padding: 10px 0;
+  /* Reduced padding */
+}
+
+/* top-left highlight block */
+button.key::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 7px;
+  width: 38%;
+  height: 34%;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .45);
+  opacity: .9;
+  pointer-events: none;
+}
+
+/* add tiny “pixel dots” on keys (like the mockup) */
+button.key::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, .35) 0 2px, transparent 3px) 10px 14px/36px 36px;
+  opacity: .35;
+  pointer-events: none;
+}
+
+/* stronger press-in animation */
+button.key:active {
+  transform: translateY(6px) scale(.99);
+  box-shadow:
+    0 1px 0 var(--px-border-dark),
+    0 0 0 3px rgba(255, 255, 255, .2) inset;
+}
+
+/* Make operators slightly darker like mockups */
+.key.op {
+  background: linear-gradient(180deg, #fff0fa, var(--px-surface2));
+}
+
+.key.eq {
+  background: linear-gradient(180deg, #ffffff, var(--px-btn2));
+  font-weight: 900;
+  color: #3b0024;
+}
+
+.key.wide {
+  grid-column: span 2;
+}
+
+/* floating animation */
+@keyframes floaty {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* hover glint */
+button.key:hover {
+  filter: brightness(1.03);
+}
+
+/* Re-using ::before for glint might conflict with usage as highlight block.
+   Let's use a separate pseudo element for glint or animate existing if compatible.
+   The user asked to animate ::before. The ::before is the highlight block.
+   Animating it might look cool as a glint. */
+button.key:hover::before {
+  animation: glint .6s ease-in-out infinite alternate;
+}
+
+@keyframes glint {
+  from {
+    opacity: .45;
+    transform: translate(0, 0);
+  }
+
+  /* matched opacity to default */
+  to {
+    opacity: .85;
+    transform: translate(2px, 1px);
+  }
+}
+
+/* result pop animation */
+.result.pop {
+  animation: popResult .25s ease-out;
+}
+
+@keyframes popResult {
+  from {
+    transform: scale(.96);
+    opacity: .6;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+/* Modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 0, 20, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  z-index: 50;
+  backdrop-filter: blur(4px);
+  /* Blur effect */
+}
+
+.overlay.show {
+  display: flex;
+}
+
+/* smoother modal entrance */
+.modal {
+  width: min(400px, 95vw);
+  /* Smaller modal */
+  background: #fff;
+  border: 4px solid var(--border);
+  box-shadow: 12px 12px 0 var(--border2);
+  border-radius: 18px;
+  overflow: hidden;
+  animation: modalIn .18s ease-out;
+  position: relative;
+}
+
+@keyframes modalIn {
+  from {
+    transform: translateY(12px) scale(.98);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.modal::before {
+  /* confetti-ish sprinkles background, pure CSS */
+  content: "";
+  position: absolute;
+  inset: -20px;
+  background:
+    radial-gradient(circle, rgba(255, 79, 163, .18) 0 2px, transparent 3px) 0 0/60px 60px,
+    radial-gradient(circle, rgba(255, 165, 0, .16) 0 2px, transparent 3px) 15px 25px/70px 70px,
+    radial-gradient(circle, rgba(0, 200, 255, .14) 0 2px, transparent 3px) 30px 10px/90px 90px;
+  pointer-events: none;
+  transform: rotate(3deg);
+}
+
+.modal>* {
+  position: relative;
+}
+
+.modal-h {
+  padding: 14px 14px 10px;
+  background: linear-gradient(var(--bg1), #fff);
+  border-bottom: 3px solid rgba(255, 90, 165, 0.35);
+}
+
+.modal-h h2 {
+  font-family: "Press Start 2P";
+  font-size: 12px;
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.modal-h p {
+  margin: 0;
+  font-size: 20px;
+  /* Smaller */
+  opacity: .9;
+}
+
+.modal-b {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.paybtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+  background: #fff7fb;
+  border: 3px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 5px 0 var(--shadow);
+  padding: 10px 12px;
+  /* Smaller */
+  font-size: 18px;
+  /* Smaller */
+  transition: transform .06s ease, box-shadow .06s ease;
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.paybtn:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--shadow);
+}
+
+/* Selected state for payment */
+.paybtn.selected {
+  background: #fdf0f6;
+  border-color: var(--px-border-dark);
+  box-shadow: inset 0 0 0 2px var(--px-border);
+}
+
+.paybtn.selected::after {
+  content: "✔";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: var(--px-border-dark);
+  text-shadow: 2px 2px 0 #fff;
+}
+
+/* Hide the original tag if selected, or move it? Let's just overlay checkmark or hide tag */
+.paybtn.selected .tag {
+  opacity: 0;
+}
+
+
+.pay-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* CSS-only "icon" blocks */
+.icon {
+  width: 40px;
+  height: 40px;
+  /* Smaller */
+  border-radius: 12px;
+  border: 3px solid rgba(0, 0, 0, .08);
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .4);
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.icon.gcash {
+  background: linear-gradient(#eaf6ff, #59b1ff);
+}
+
+.icon.card {
+  background: linear-gradient(#fff3e2, #ffbf73);
+}
+
+.icon.maya {
+  background: linear-gradient(#ecfff1, #4cd77a);
+}
+
+.icon.cod {
+  background: linear-gradient(#fff0f0, #ff7b7b);
+}
+
+.icon::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .55);
+  clip-path: polygon(0 55%, 40% 55%, 40% 0, 60% 0, 60% 55%, 100% 55%, 100% 75%, 60% 75%, 60% 100%, 40% 100%, 40% 75%, 0 75%);
+  opacity: .55;
+}
+
+.tag {
+  font-family: "Press Start 2P";
+  font-size: 8px;
+  /* Smaller */
+  background: #ffe0f0;
+  padding: 4px 6px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 90, 165, 0.35);
+  white-space: nowrap;
+  transition: opacity .2s;
+}
+
+.gcash-num {
+  font-family: "Press Start 2P";
+  font-size: 8px;
+  /* Smaller */
+  opacity: .85;
+  margin-top: 2px;
+}
+
+.modal-f {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-top: 3px dashed rgba(255, 90, 165, 0.45);
+  background: #fff;
+}
+
+.small {
+  font-size: 16px;
+  /* Smaller */
+  opacity: .75;
+  line-height: 1.2;
+}
+
+.close {
+  border: none;
+  cursor: pointer;
+  background: #ffe0f0;
+  border: 3px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 10px;
+  /* Smaller */
+  font-size: 16px;
+  /* Smaller */
+  box-shadow: 0 4px 0 var(--border2);
+}
+
+.close:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 var(--border2);
+}
+
+/* processing banner */
+.processing {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(255, 255, 255, .92);
+  border-radius: 14px;
+  font-size: 24px;
+  /* Smaller */
+  font-weight: 700;
+  color: #8a004f;
+  z-index: 10;
+}
+
+.processing.show {
+  display: flex;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 4px solid rgba(255, 90, 165, .25);
+  border-top-color: rgba(255, 90, 165, 1);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* confetti (pure CSS) */
+.confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 80;
+  display: none;
+}
+
+.confetti.show {
+  display: block;
+}
+
+.piece {
+  position: absolute;
+  top: -10vh;
+  width: 10px;
+  height: 18px;
+  border-radius: 4px;
+  opacity: .9;
+  animation: fall 1.2s ease-in forwards;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .15));
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(120vh) rotate(540deg);
+    opacity: 1;
+  }
+}
+
+/* toast */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 3px solid var(--border);
+  box-shadow: 8px 8px 0 var(--border2);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: none;
+  z-index: 90;
+  font-size: 20px;
+  /* Smaller */
+  animation: pop .18s ease-out;
+}
+
+.toast.show {
+  display: block;
+}

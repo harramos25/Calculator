@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg1: #ffb6d9;
+            --bg2: #ff8ec7;
+
+            --frame: #ff5aa5;
+            --frameDark: #c61d6a;
+
+            --panel: #fff3fb;
+            --panel2: #ffd2ea;
+
+            --btn: #ff88c4;
+            --btn2: #ff66b5;
+
+            --op: #ffc1e1;
+            --ink: #4b0030;
+
+            --success: #1d6b56;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 20% 10%, #ffe6f4 0 22%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #ffd1ea 0 18%, transparent 45%),
+                linear-gradient(180deg, var(--bg1), var(--bg2));
+            font-family: system-ui, sans-serif;
+            overflow: hidden;
+            /* Prevent scrollbars from huge modal backdrop */
+        }
+
+        .stage {
+            width: min(720px, 98vw);
+            padding: 12px;
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            max-height: 95vh;
+            /* keep it inside viewport */
+            display: block;
+            shape-rendering: crispEdges;
+            image-rendering: pixelated;
+            overflow: visible;
+            /* Allow modal backdrop to spill out */
+        }
+
+        /* clickable buttons */
+        .btn {
+            cursor: pointer;
+        }
+
+        .btn:hover .btnFace {
+            filter: brightness(1.03);
+        }
+
+        .btn:active .btnShadow {
+            transform: translateY(7px);
+            opacity: .9;
+        }
+
+        .btn:active .btnFace {
+            transform: translateY(7px);
+        }
+
+        /* modal entrance */
+        .popIn {
+            transform-origin: 50% 50%;
+            animation: popIn .18s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: translateY(10px) scale(.98);
+                opacity: .7;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* processing shimmer */
+        .blink {
+            animation: blink 0.85s steps(2, end) infinite;
+        }
+
+        @keyframes blink {
+            50% {
+                opacity: .35;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="stage">
+        <svg class="svgWrap" viewBox="0 0 360 520" aria-label="Paywall Calculator SVG">
+            <defs>
+                <!-- Dither / pixel texture -->
+                <pattern id="dither" width="8" height="8" patternUnits="userSpaceOnUse">
+                    <rect width="8" height="8" fill="transparent"></rect>
+                    <rect x="1" y="1" width="1" height="1" fill="rgba(255,255,255,0.35)"></rect>
+                    <rect x="5" y="3" width="1" height="1" fill="rgba(255,255,255,0.25)"></rect>
+                    <rect x="2" y="6" width="1" height="1" fill="rgba(255,255,255,0.22)"></rect>
+                    <rect x="6" y="6" width="1" height="1" fill="rgba(255,255,255,0.18)"></rect>
+                </pattern>
+
+                <!-- Scanlines for screen -->
+                <pattern id="scan" width="1" height="8" patternUnits="userSpaceOnUse">
+                    <rect width="1" height="1" fill="rgba(255,90,165,0.18)"></rect>
+                    <rect y="1" width="1" height="7" fill="transparent"></rect>
+                </pattern>
+
+                <!-- Sparkles -->
+                <pattern id="spark" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <rect width="60" height="60" fill="transparent"></rect>
+                    <rect x="10" y="12" width="2" height="2" fill="rgba(255,255,255,0.75)"></rect>
+                    <rect x="44" y="18" width="2" height="2" fill="rgba(255,255,255,0.55)"></rect>
+                    <rect x="24" y="46" width="2" height="2" fill="rgba(255,255,255,0.55)"></rect>
+                </pattern>
+
+                <!-- Gradients -->
+                <linearGradient id="frameGrad" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#fff2fb" />
+                    <stop offset="0.35" stop-color="#ffd0e6" />
+                    <stop offset="1" stop-color="#ffc0de" />
+                </linearGradient>
+
+                <linearGradient id="btnGrad" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#fff1fb" />
+                    <stop offset="0.55" stop-color="#ffb3da" />
+                    <stop offset="1" stop-color="#ff78c0" />
+                </linearGradient>
+
+                <linearGradient id="eqGrad" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#ffffff" />
+                    <stop offset="0.55" stop-color="#ffb0d8" />
+                    <stop offset="1" stop-color="#ff5fb2" />
+                </linearGradient>
+
+                <linearGradient id="screenGrad" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#ffffff" />
+                    <stop offset="1" stop-color="#fff3fb" />
+                </linearGradient>
+            </defs>
+
+            <!-- HEADER TEXT & BANNER -->
+            <!-- HEADER TEXT & BANNER -->
+            <g transform="translate(180, 50)">
+                <rect x="-100" y="-24" width="200" height="42" rx="12" fill="#c61d6a" opacity="0.8" />
+                <rect x="-96" y="-20" width="192" height="34" rx="8" fill="#c61d6a" stroke="#fff" stroke-width="2" />
+                <text x="0" y="8" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="16"
+                    fill="#fff" opacity="1">CALCULATOR</text>
+            </g>
+
+            <!-- CALC FRAME SHADOW -->
+            <rect x="68" y="110" width="240" height="392" rx="32" fill="var(--frameDark)" />
+            <!-- CALC FRAME -->
+            <rect x="60" y="102" width="240" height="392" rx="32" fill="url(#frameGrad)" stroke="var(--frame)"
+                stroke-width="4" />
+            <!-- Inner “step” border -->
+            <rect x="72" y="114" width="216" height="368" rx="24" fill="transparent" stroke="rgba(255,255,255,0.4)"
+                stroke-width="4" />
+            <rect x="80" y="122" width="200" height="352" rx="20" fill="transparent" stroke="rgba(255,90,165,0.22)"
+                stroke-width="4" />
+
+            <!-- Texture overlays -->
+            <rect x="60" y="102" width="240" height="392" rx="32" fill="url(#dither)" opacity="0.35" />
+            <rect x="60" y="102" width="240" height="392" rx="32" fill="url(#spark)" opacity="0.25" />
+
+            <!-- Sticker -->
+            <g transform="translate(250,118) rotate(10)">
+                <rect x="-52" y="-10" width="96" height="48" rx="4" fill="var(--frameDark)" />
+                <rect x="-60" y="-18" width="96" height="48" rx="4" fill="#ff5aa5" stroke="#fff" stroke-width="3" />
+                <text x="-12" y="6" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="10"
+                    fill="#fff">PIXEL</text>
+                <text x="-12" y="24" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="10"
+                    fill="#fff">PINK</text>
+            </g>
+
+            <!-- SCREEN SHADOW -->
+            <rect x="88" y="152" width="196" height="76" rx="12" fill="rgba(198,29,106,.35)" />
+            <!-- SCREEN -->
+            <rect x="80" y="144" width="196" height="76" rx="12" fill="url(#screenGrad)" stroke="var(--frame)"
+                stroke-width="4" />
+            <rect x="80" y="144" width="196" height="76" rx="12" fill="url(#scan)" opacity="0.35" />
+
+            <!-- Expression / Result (SVG text updated by JS) -->
+            <text id="exprText" x="92" y="176" font-family="&quot;Press Start 2P&quot;" font-size="16"
+                fill="#4b0030">0</text>
+            <text id="resText" x="268" y="210" text-anchor="end" font-family="&quot;Press Start 2P&quot;" font-size="18"
+                fill="var(--px3)"></text>
+
+            <!-- Processing overlay inside screen -->
+            <g id="processingLayer" style="display:none;">
+                <rect x="80" y="144" width="196" height="76" rx="12" fill="rgba(255,255,255,0.90)" />
+                <text x="178" y="190" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="14"
+                    fill="#8a004f">
+                    Processing<tspan class="blink">...</tspan>
+                </text>
+            </g>
+
+            <!-- BUTTONS (built as SVG groups) -->
+            <g id="keys"></g>
+
+            <!-- Celebration overlay (Toast style) -->
+            <g id="celebrateLayer" style="display:none; pointer-events: none;">
+                <!-- Toast background pill (Wider) -->
+                <rect x="20" y="420" width="320" height="50" rx="25" ry="25" fill="#fff" stroke="var(--frame)"
+                    stroke-width="3" />
+                <rect x="24" y="424" width="312" height="42" rx="21" ry="21" fill="#ffeaf4" />
+
+                <!-- Toast Text -->
+                <text x="180" y="448" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="10"
+                    fill="#4b0030">
+                    Thank you bestie! 💗
+                </text>
+                <text x="180" y="462" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="8"
+                    fill="#1d6b56">
+                    Answer unlocked
+                </text>
+            </g>
+
+            <!-- MODAL OVERLAY (SVG) -->
+            <g id="modalLayer" style="display:none;">
+                <!-- dim background (huge to cover screen) -->
+                <rect x="-2000" y="-2000" width="5000" height="5000" fill="rgba(20,0,15,0.45)" />
+                <!-- modal panel shadow -->
+                <rect x="44" y="152" width="272" height="332" rx="16" fill="var(--frameDark)" />
+                <!-- modal panel -->
+                <g class="popIn">
+                    <rect x="36" y="144" width="272" height="332" rx="16" fill="#ffe5f2" stroke="var(--frame)"
+                        stroke-width="4" />
+                    <rect x="48" y="156" width="248" height="308" rx="12" fill="transparent"
+                        stroke="rgba(255,255,255,0.45)" stroke-width="4" />
+                    <rect x="56" y="164" width="232" height="292" rx="10" fill="transparent"
+                        stroke="rgba(255,90,165,0.20)" stroke-width="4" />
+
+                    <text x="172" y="184" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="12"
+                        fill="#4b0030">
+                        UNLOCK YOUR ANSWER ✨
+                    </text>
+                    <text x="172" y="210" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="12"
+                        fill="#4b0030" opacity="0.9">
+                        Pick a payment method!
+                    </text>
+
+                    <!-- payment options container -->
+                    <g id="payOptions"></g>
+
+                    <!-- close button -->
+                    <g class="btn" id="closeModalBtn">
+                        <rect class="btnShadow" x="218" y="440" width="78" height="30" rx="8"
+                            fill="rgba(198,29,106,.35)" />
+                        <rect class="btnFace" x="210" y="432" width="78" height="30" rx="8" fill="url(#btnGrad)"
+                            stroke="var(--frame)" stroke-width="3" />
+                        <text x="249" y="453" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                            font-size="10" fill="#4b0030">Close</text>
+                    </g>
+                </g>
+            </g>
+
+            <!-- TIP MODAL (SVG) -->
+            <g id="tipLayer" style="display:none;">
+                <!-- dim background (huge to cover screen) -->
+                <rect x="-2000" y="-2000" width="5000" height="5000" fill="rgba(20,0,15,0.45)" />
+                <!-- tip panel shadow -->
+                <rect x="44" y="152" width="272" height="332" rx="16" fill="var(--frameDark)" />
+                <!-- tip panel -->
+                <g class="popIn">
+                    <rect x="36" y="144" width="272" height="332" rx="16" fill="#ffe5f2" stroke="var(--frame)"
+                        stroke-width="4" />
+                    <rect x="48" y="156" width="248" height="308" rx="12" fill="transparent"
+                        stroke="rgba(255,255,255,0.45)" stroke-width="4" />
+                    <rect x="56" y="164" width="232" height="292" rx="10" fill="transparent"
+                        stroke="rgba(255,90,165,0.20)" stroke-width="4" />
+
+                    <text x="172" y="200" text-anchor="middle" font-family="&quot;Press Start 2P&quot;" font-size="14"
+                        fill="#4b0030">TIP JAR 💖</text>
+
+                    <!-- Tip Options -->
+                    <g id="tipOptions"></g>
+
+                    <!-- Close Tip -->
+                    <g class="btn" id="closeTipBtn">
+                        <rect class="btnShadow" x="218" y="440" width="78" height="30" rx="8"
+                            fill="rgba(198,29,106,.35)" />
+                        <rect class="btnFace" x="210" y="432" width="78" height="30" rx="8" fill="url(#btnGrad)"
+                            stroke="var(--frame)" stroke-width="3" />
+                        <text x="249" y="453" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                            font-size="10" fill="#4b0030">Close</text>
+                    </g>
+                </g>
+            </g>
+
+            <!-- CONFETTI LAYER -->
+            <g id="confettiLayer" style="display:none; pointer-events: none;"></g>
+        </svg>
+    </div>
+
+    <script>
+        // --- helpers to create SVG elements ---
+        const NS = "http://www.w3.org/2000/svg";
+        const $ = (id) => document.getElementById(id);
+
+        function el(name, attrs = {}) {
+            const n = document.createElementNS(NS, name);
+            for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+            return n;
+        }
+
+        // --- calculator state ---
+        let expr = "0";
+        let pendingAnswer = null;
+
+        const exprText = $("exprText");
+        const resText = $("resText");
+
+        const processingLayer = $("processingLayer");
+        const modalLayer = $("modalLayer");
+        const tipLayer = $("tipLayer");
+        const celebrateLayer = $("celebrateLayer");
+        // const celebrateExpr = $("celebrateExpr"); // No longer needed
+        // const celebrateAns = $("celebrateAns");   // No longer needed
+        const confettiLayer = $("confettiLayer");
+
+        function render() {
+            // show × ÷ in UI, keep * / in logic
+            const shown = expr.replaceAll("*", "×").replaceAll("/", "÷");
+            exprText.textContent = shown;
+        }
+
+        function safeEval(s) {
+            if (!/^[0-9+\-*/().\s]+$/.test(s)) throw new Error("Invalid");
+            // eslint-disable-next-line no-new-func
+            const val = Function('"use strict";return (' + s + ')')();
+            if (!Number.isFinite(val)) throw new Error("Math error");
+            return val;
+        }
+
+        function setResult(txt) {
+            let shown = String(txt || "");
+            if (shown.length > 9) {
+                // simple truncate if too long
+                shown = shown.substring(0, 9);
+            }
+            resText.textContent = shown;
+        }
+
+        // --- build keys as SVG ---
+        const keys = $("keys");
+
+        const layout = [
+            ["AC", "back", "(", ")"],
+            ["7", "8", "9", "/"],
+            ["4", "5", "6", "*"],
+            ["1", "2", "3", "-"],
+            ["0", "W0", ".", "+"],
+            ["=", "WEQ", "TIP", "WTIP"]
+        ];
+
+        // positions inside calc
+        const startX = 85;
+        const startY = 232;
+
+        // make buttons a bit smaller so height isn’t crazy
+        const gap = 6;
+        const w = 42;
+        const h = 36;
+
+        function addKey(label, x, y, width, height, type = "num") {
+            const g = el("g", { class: "btn", transform: `translate(${x} ${y})` });
+            g.dataset.label = label;
+
+            const shadow = el("rect", {
+                class: "btnShadow",
+                x: "8", y: "8",
+                width: String(width), height: String(height),
+                rx: "6",
+                fill: "rgba(198,29,106,.35)"
+            });
+
+            const faceFill =
+                label === "=" ? "url(#eqGrad)" :
+                    (type === "op" || type === "tip") ? "#ffc1e1" :
+                        "url(#btnGrad)";
+
+            const face = el("rect", {
+                class: "btnFace",
+                x: "0", y: "0",
+                width: String(width), height: String(height),
+                rx: "6",
+                fill: faceFill,
+                stroke: "var(--frame)",
+                "stroke-width": "4"
+            });
+
+            const hi = el("rect", {
+                x: "8", y: "8",
+                width: String(Math.max(14, Math.floor(width * 0.42))),
+                height: String(Math.floor(height * 0.35)),
+                rx: "2",
+                fill: "rgba(255,255,255,0.45)"
+            });
+
+            const text = el("text", {
+                x: String(width / 2),
+                y: String(height / 2 + 9),
+                "text-anchor": "middle",
+                "font-family": "\"Press Start 2P\"",
+                "font-size": (label.length >= 3 ? "12" : "16"),
+                fill: "var(--ink)"
+            });
+
+            let shownLabel = label;
+            if (label === "/") shownLabel = "÷";
+            if (label === "*") shownLabel = "×";
+            if (label === "back") shownLabel = "⌫";
+            if (label === "TIP") shownLabel = "TIP";
+
+            text.textContent = shownLabel;
+
+            g.appendChild(shadow);
+            g.appendChild(face);
+            g.appendChild(hi);
+            g.appendChild(text);
+
+            g.addEventListener("click", () => handleKey(label));
+            keys.appendChild(g);
+        }
+
+        function handleKey(label) {
+            if (label === "AC") {
+                expr = "0"; pendingAnswer = null;
+                setResult("");
+                celebrateLayer.style.display = "none";
+                render();
+                return;
+            }
+            if (label === "back") {
+                expr = expr.length <= 1 ? "0" : expr.slice(0, -1);
+                render();
+                return;
+            }
+            if (label === "TIP") {
+                openTipModal();
+                return;
+            }
+            if (label === "=") {
+                try {
+                    const val = safeEval(expr);
+                    // format nice short string
+                    let s = String(val);
+                    if (s.length > 9) {
+                        s = val.toPrecision(6);
+                        // remove exponential if possible? 
+                        if (String(s).length > 9) s = val.toFixed(6);
+                    }
+                    // strip trailing zeros
+                    if (s.includes('.')) s = s.replace(/\.?0+$/, "");
+
+                    pendingAnswer = s;
+                    openModal();
+                } catch (e) {
+                    setResult("ERR");
+                }
+                return;
+            }
+
+            // normal input
+            if (expr === "0" && /[0-9.]/.test(label)) expr = (label === ".") ? "0." : label;
+            else expr += label;
+
+            render();
+        }
+
+        // Build keys with correct indexing (NO for..of bug)
+        for (let r = 0; r < layout.length; r++) {
+            const row = layout[r];
+            let col = 0;
+
+            for (let i = 0; i < row.length; i++) {
+                const item = row[i];
+
+                if (item === "W0" || item === "WEQ" || item === "WTIP") continue;
+
+                const x = startX + col * (w + gap);
+                const y = startY + r * (h + gap);
+
+                // Wide 0
+                if (item === "0" && row[i + 1] === "W0") {
+                    addKey("0", x, y, (2 * w + gap), h, "num");
+                    col += 2;
+                    continue;
+                }
+
+                // Wide =
+                if (item === "=" && row[i + 1] === "WEQ") {
+                    addKey("=", x, y, (2 * w + gap), h, "eq");
+                    col += 2;
+                    continue;
+                }
+
+                // Wide TIP
+                if (item === "TIP" && row[i + 1] === "WTIP") {
+                    addKey("TIP", x, y, (2 * w + gap), h, "tip");
+                    col += 2;
+                    continue;
+                }
+
+                const type = (["/", "*", "-", "+", "(", ")"].includes(item)) ? "op" : "num";
+                addKey(item, x, y, w, h, type);
+                col += 1;
+            }
+        }
+
+        // --- modal payment options (SVG) ---
+        const payOptions = $("payOptions");
+
+        const options = [
+            { id: "gcash", label: "GCash", sub: "09XX-XXX-XXXX", tag: "FASTEST", color: "#4aa8ff" },
+            { id: "card", label: "Credit Card", sub: "VISA / MC", tag: "CARD", color: "#ffb167" },
+            { id: "maya", label: "Maya", sub: "tap to “pay”", tag: "CUTE", color: "#40d479" },
+            { id: "apple", label: "Apple Pay", sub: "FaceID confirmed", tag: "APPLE", color: "#333333" }
+        ];
+
+        function addPayOption(o, i) {
+            const x = 60, y = 252 + i * 44;
+
+            const g = el("g", { class: "btn", transform: `translate(${x} ${y})` });
+            g.dataset.pay = o.id;
+
+            const shadow = el("rect", { class: "btnShadow", x: "8", y: "8", width: "240", height: "34", rx: "8", fill: "rgba(198,29,106,.35)" });
+            const face = el("rect", { class: "btnFace", x: "0", y: "0", width: "240", height: "34", rx: "8", fill: "rgba(255,255,255,0.7)", stroke: "var(--frame)", "stroke-width": "3" });
+
+            // pixel icon block
+            const iconShadow = el("rect", { x: "12", y: "10", width: "22", height: "22", rx: "4", fill: "rgba(0,0,0,0.12)" });
+            const icon = el("rect", { x: "10", y: "8", width: "22", height: "22", rx: "4", fill: o.color, stroke: "rgba(0,0,0,0.10)", "stroke-width": "2" });
+
+            // texts
+            const t1 = el("text", { x: "44", y: "22", "font-family": "\"Press Start 2P\"", "font-size": "10", fill: "#4b0030" });
+            t1.textContent = o.label;
+
+            const t2 = el("text", { x: "44", y: "32", "font-family": "\"Press Start 2P\"", "font-size": "8", fill: "#4b0030", opacity: "0.75" });
+            t2.textContent = o.sub;
+
+            // tag pill
+            const tagShadow = el("rect", { x: "186", y: "12", width: "50", height: "16", rx: "6", fill: "rgba(0,0,0,0.12)" });
+            const tag = el("rect", { x: "184", y: "10", width: "50", height: "16", rx: "6", fill: "#ffe0f0", stroke: "rgba(0,0,0,0.10)", "stroke-width": "2" });
+            const tagText = el("text", { x: "209", y: "22", "text-anchor": "middle", "font-family": "\"Press Start 2P\"", "font-size": "8", fill: "#4b0030" });
+            tagText.textContent = o.tag;
+
+            g.appendChild(shadow);
+            g.appendChild(face);
+            g.appendChild(iconShadow);
+            g.appendChild(icon);
+            g.appendChild(t1);
+            g.appendChild(t2);
+            g.appendChild(tagShadow);
+            g.appendChild(tag);
+            g.appendChild(tagText);
+
+            g.addEventListener("click", () => fakePay(o.id));
+            payOptions.appendChild(g);
+        }
+
+        options.forEach(addPayOption);
+
+        // --- TIP OPTIONS ---
+        const tipOptionsContainer = $("tipOptions");
+        const tipLevels = [
+            { amt: "5", label: "Cute", emoji: "🍬" },
+            { amt: "20", label: "Sweet", emoji: "🍰" },
+            { amt: "50", label: "Bestie", emoji: "💖" },
+            { amt: "100", label: "Legend", emoji: "👑" }
+        ];
+
+        function addTipOption(t, i) {
+            const x = 60, y = 240 + i * 48; // a bit taller spacing
+
+            const g = el("g", { class: "btn", transform: `translate(${x} ${y})` });
+
+            // Background
+            const shadow = el("rect", { class: "btnShadow", x: "8", y: "8", width: "240", height: "38", rx: "8", fill: "rgba(198,29,106,.35)" });
+            const face = el("rect", { class: "btnFace", x: "0", y: "0", width: "240", height: "38", rx: "8", fill: "rgba(255,255,255,0.9)", stroke: "var(--frame)", "stroke-width": "3" });
+
+            // Emoji circle
+            const iconBg = el("circle", { cx: "26", cy: "19", r: "14", fill: "#ffe5f2" });
+            const icon = el("text", { x: "26", y: "24", "text-anchor": "middle", "font-size": "16" });
+            icon.textContent = t.emoji;
+
+            // Amount
+            const tAmt = el("text", { x: "50", y: "25", "font-family": "\"Press Start 2P\"", "font-size": "12", fill: "#c61d6a" });
+            tAmt.textContent = "P" + t.amt;
+
+            // Label
+            const tLbl = el("text", { x: "230", y: "25", "text-anchor": "end", "font-family": "\"Press Start 2P\"", "font-size": "10", fill: "#4b0030", opacity: "0.8" });
+            tLbl.textContent = t.label;
+
+            g.appendChild(shadow);
+            g.appendChild(face);
+            g.appendChild(iconBg);
+            g.appendChild(icon);
+            g.appendChild(tAmt);
+            g.appendChild(tLbl);
+
+            g.addEventListener("click", () => fakeTip(t.amt));
+            tipOptionsContainer.appendChild(g);
+        }
+
+        tipLevels.forEach(addTipOption);
+
+        // Tip Modal Logic
+        function openTipModal() {
+            tipLayer.style.display = "block";
+        }
+
+        $("closeTipBtn").addEventListener("click", () => {
+            tipLayer.style.display = "none";
+        });
+
+        async function fakeTip(amount) {
+            tipLayer.style.display = "none";
+
+            // processing
+            processingLayer.style.display = "block";
+            setResult("Tipping...");
+            await new Promise(r => setTimeout(r, 1200));
+            processingLayer.style.display = "none";
+
+            // celebration
+            setResult("");
+
+            // Update toast text for tip
+            const toastLines = celebrateLayer.querySelectorAll("text");
+            toastLines[0].textContent = `Thank you bestie! P${amount} tipped 💗`;
+            toastLines[1].textContent = "You are amazing!";
+
+            burstConfetti();
+            celebrateLayer.style.display = "block";
+
+            setTimeout(() => {
+                celebrateLayer.style.display = "none";
+                // Restore default toast text
+                toastLines[0].textContent = "Thank you bestie! 💗";
+                toastLines[1].textContent = "Answer unlocked";
+            }, 3000);
+        }
+
+        // close modal
+        $("closeModalBtn").addEventListener("click", () => {
+            modalLayer.style.display = "none";
+        });
+
+        // open modal
+        function openModal() {
+            modalLayer.style.display = "block";
+        }
+
+        // confetti
+        let confettiAnimId = null;
+        let particles = [];
+
+        function burstConfetti() {
+            // clear old
+            confettiLayer.innerHTML = "";
+            confettiLayer.style.display = "block";
+            if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+            particles = [];
+
+            const count = 80;
+            const colors = ["#ff5aa5", "#40d479", "#4aa8ff", "#ffb167", "#ffffff", "#ffd700"];
+
+            for (let i = 0; i < count; i++) {
+                const p = {
+                    x: 180, // start center
+                    y: 200,
+                    vx: (Math.random() - 0.5) * 12, // explode out
+                    vy: (Math.random() - 0.5) * 12 - 5, // up pop
+                    grav: 0.15,
+                    drag: 0.96,
+                    rot: Math.random() * 360,
+                    vRot: (Math.random() - 0.5) * 10,
+                    size: Math.random() * 6 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    el: null
+                };
+
+                // SVG element
+                const r = el("rect", {
+                    x: "0", y: "0",
+                    width: String(p.size),
+                    height: String(p.size),
+                    fill: p.color,
+                    rx: "2"
+                });
+
+                confettiLayer.appendChild(r);
+                p.el = r;
+                particles.push(p);
+            }
+
+            let start = null;
+
+            function tick(timestamp) {
+                if (!start) start = timestamp;
+                const dt = timestamp - start;
+
+                let alive = false;
+                particles.forEach(p => {
+                    // physics
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= p.drag;
+                    p.vy += p.grav;
+                    p.rot += p.vRot;
+
+                    // render
+                    // check bounds roughly (0-360, 0-520)
+                    if (p.y < 550) {
+                        alive = true;
+                        p.el.setAttribute("transform", `translate(${p.x} ${p.y}) rotate(${p.rot})`);
+                    } else {
+                        p.el.style.display = 'none';
+                    }
+                });
+
+                if (alive && dt < 4000) {
+                    confettiAnimId = requestAnimationFrame(tick);
+                } else {
+                    confettiLayer.style.display = "none";
+                }
+            }
+
+            confettiAnimId = requestAnimationFrame(tick);
+        }
+
+        async function fakePay(method) {
+            modalLayer.style.display = "none";
+
+            // processing in screen
+            processingLayer.style.display = "block";
+            setResult("");
+
+            await new Promise(r => setTimeout(r, 900));
+            processingLayer.style.display = "none";
+
+            // show result
+            setResult(pendingAnswer ?? "0");
+
+            // celebration overlay inside calc
+            burstConfetti();
+            celebrateLayer.style.display = "block";
+
+            // hide toast after 3 seconds
+            setTimeout(() => {
+                celebrateLayer.style.display = "none";
+            }, 3000);
+        }
+
+        // init render
+        render();
+
+        // (Optional) click on celebration layer to close it
+        // celebrateLayer.addEventListener("click", () => {
+        // celebrateLayer.style.display = "none";
+        // });
+    </script>
+</body>
+
+</html>
