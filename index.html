@@ -374,6 +374,7 @@
         const modalLayer = $("modalLayer");
         const tipLayer = $("tipLayer");
         const celebrateLayer = $("celebrateLayer");
+        let girlMathMessage = ""; // Store the message for later
         // const celebrateExpr = $("celebrateExpr"); // No longer needed
         // const celebrateAns = $("celebrateAns");   // No longer needed
         const confettiLayer = $("confettiLayer");
@@ -385,6 +386,14 @@
         }
 
         function safeEval(s) {
+            // Implicit multiplication handling:
+            // 9( -> 9*(
+            s = s.replace(/(\d)\(/g, '$1*(');
+            // )9 -> )*9
+            s = s.replace(/\)(\d)/g, ')*$1');
+            // )( -> )*(
+            s = s.replace(/\)\(/g, ')*(');
+
             if (!/^[0-9+\-*/().\s]+$/.test(s)) throw new Error("Invalid");
             // eslint-disable-next-line no-new-func
             const val = Function('"use strict";return (' + s + ')')();
@@ -520,6 +529,22 @@
                     if (s.includes('.')) s = s.replace(/\.?0+$/, "");
 
                     pendingAnswer = s;
+
+                    // --- GIRL MATH LOGIC ---
+                    girlMathMessage = "";
+                    const numVal = parseFloat(val);
+                    if (numVal < 0) {
+                        girlMathMessage = "Profit! 💸";
+                    } else if (numVal <= 50) {
+                        girlMathMessage = "Basically free! 💅";
+                    } else if (val > 200) {
+                        girlMathMessage = "It’s an investment ✨";
+                    } else if (expr.includes("-")) {
+                        girlMathMessage = "You made money! 🎀";
+                    }
+                    // Default fallback if needed
+                    if (!girlMathMessage) girlMathMessage = "Girl math verified ✅";
+
                     openModal();
                 } catch (e) {
                     setResult("ERR");
@@ -819,6 +844,19 @@
 
             // celebration overlay inside calc
             burstConfetti();
+
+            // Set custom girl math message
+            const toastLines = celebrateLayer.querySelectorAll("text");
+            // Standard: "Thank you bestie! 💗" is line [0]
+            // Standard: "Answer unlocked" is line [1]
+            if (girlMathMessage) {
+                toastLines[0].textContent = girlMathMessage;
+                toastLines[1].textContent = "Math = Girled";
+            } else {
+                toastLines[0].textContent = "Thank you bestie! 💗";
+                toastLines[1].textContent = "Answer unlocked";
+            }
+
             celebrateLayer.style.display = "block";
 
             // hide toast after 3 seconds
