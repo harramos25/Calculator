@@ -531,19 +531,7 @@
                     pendingAnswer = s;
 
                     // --- GIRL MATH LOGIC ---
-                    girlMathMessage = "";
-                    const numVal = parseFloat(val);
-                    if (numVal < 0) {
-                        girlMathMessage = "Profit! 💸";
-                    } else if (numVal <= 50) {
-                        girlMathMessage = "Basically free! 💅";
-                    } else if (val > 200) {
-                        girlMathMessage = "It’s an investment ✨";
-                    } else if (expr.includes("-")) {
-                        girlMathMessage = "You made money! 🎀";
-                    }
-                    // Default fallback if needed
-                    if (!girlMathMessage) girlMathMessage = "Girl math verified ✅";
+                    girlMathMessage = "It’s an investment ✨";
 
                     openModal();
                 } catch (e) {
