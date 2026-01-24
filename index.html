@@ -30,9 +30,15 @@
             --success: #1d6b56;
         }
 
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            min-height: 100vh;
+            min-height: 100dvh;
             display: grid;
             place-items: center;
             background:
@@ -45,7 +51,7 @@
         }
 
         .stage {
-            width: min(720px, 98vw);
+            width: min(600px, 100%);
             padding: 12px;
         }
 
@@ -285,10 +291,12 @@
                     <g class="btn" id="closeModalBtn">
                         <rect class="btnShadow" x="218" y="440" width="78" height="30" rx="8"
                             fill="rgba(198,29,106,.35)" />
-                        <rect class="btnFace" x="210" y="432" width="78" height="30" rx="8" fill="url(#btnGrad)"
-                            stroke="var(--frame)" stroke-width="3" />
-                        <text x="249" y="453" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
-                            font-size="10" fill="#4b0030">Close</text>
+                        <g class="btnContent">
+                            <rect class="btnFace" x="210" y="432" width="78" height="30" rx="8" fill="url(#btnGrad)"
+                                stroke="var(--frame)" stroke-width="3" />
+                            <text x="249" y="453" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                                font-size="10" fill="#4b0030">Close</text>
+                        </g>
                     </g>
                 </g>
             </g>
@@ -328,20 +336,24 @@
                         <g class="btn" id="tipCloseBtn" transform="translate(66, 0)">
                             <rect class="btnShadow" x="4" y="4" width="90" height="34" rx="8"
                                 fill="rgba(198,29,106,.35)" />
-                            <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#ffb3da"
-                                stroke="var(--frame)" stroke-width="3" />
-                            <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
-                                font-size="10" fill="#4b0030">X</text>
+                            <g class="btnContent">
+                                <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#ffb3da"
+                                    stroke="var(--frame)" stroke-width="3" />
+                                <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                                    font-size="10" fill="#4b0030">X</text>
+                            </g>
                         </g>
 
                         <!-- Done -->
                         <g class="btn" id="tipDoneBtn" transform="translate(186, 0)">
                             <rect class="btnShadow" x="4" y="4" width="90" height="34" rx="8"
                                 fill="rgba(198,29,106,.35)" />
-                            <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#40d479"
-                                stroke="var(--frame)" stroke-width="3" />
-                            <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
-                                font-size="10" fill="#fff">Done</text>
+                            <g class="btnContent">
+                                <rect class="btnFace" x="0" y="0" width="90" height="34" rx="8" fill="#40d479"
+                                    stroke="var(--frame)" stroke-width="3" />
+                                <text x="45" y="22" text-anchor="middle" font-family="&quot;Press Start 2P&quot;"
+                                    font-size="10" fill="#fff">Done</text>
+                            </g>
                         </g>
                     </g>
                 </g>
@@ -606,6 +618,9 @@
             g.dataset.pay = o.id;
 
             const shadow = el("rect", { class: "btnShadow", x: "8", y: "8", width: "240", height: "34", rx: "8", fill: "rgba(198,29,106,.35)" });
+
+            const content = el("g", { class: "btnContent" });
+
             const face = el("rect", { class: "btnFace", x: "0", y: "0", width: "240", height: "34", rx: "8", fill: "rgba(255,255,255,0.7)", stroke: "var(--frame)", "stroke-width": "3" });
 
             // pixel icon block
@@ -632,14 +647,15 @@
             tagText.textContent = o.tag;
 
             g.appendChild(shadow);
-            g.appendChild(face);
-            g.appendChild(iconShadow);
-            g.appendChild(icon);
-            g.appendChild(t1);
-            g.appendChild(t2);
-            g.appendChild(tagShadow);
-            g.appendChild(tag);
-            g.appendChild(tagText);
+            content.appendChild(face);
+            content.appendChild(iconShadow);
+            content.appendChild(icon);
+            content.appendChild(t1);
+            content.appendChild(t2);
+            content.appendChild(tagShadow);
+            content.appendChild(tag);
+            content.appendChild(tagText);
+            g.appendChild(content);
 
             g.addEventListener("click", () => fakePay(o.id));
             payOptions.appendChild(g);
@@ -663,8 +679,18 @@
 
                 const g = el("g", { class: "btn", transform: `translate(${x} 0)` });
 
+                const shadow = el("rect", {
+                    class: "btnShadow",
+                    x: "4", y: "4",
+                    width: "52", height: "30", rx: "8",
+                    fill: "rgba(198,29,106,.35)"
+                });
+
+                const content = el("g", { class: "btnContent" });
+
                 // Pill shape
                 const bg = el("rect", {
+                    x: "0", y: "0",
                     width: "52", height: "30", rx: "8",
                     fill: isSel ? "#c61d6a" : "#fff",
                     stroke: "#c61d6a", "stroke-width": "2"
@@ -677,8 +703,10 @@
                 });
                 txt.textContent = amt;
 
-                g.appendChild(bg);
-                g.appendChild(txt);
+                g.appendChild(shadow);
+                content.appendChild(bg);
+                content.appendChild(txt);
+                g.appendChild(content);
                 g.addEventListener("click", () => setTipAmount(amt));
                 tipAmountsContainer.appendChild(g);
             });
