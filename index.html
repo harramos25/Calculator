@@ -486,7 +486,7 @@
                 y: String(height / 2 + 9),
                 "text-anchor": "middle",
                 "font-family": "\"Press Start 2P\"",
-                "font-size": (label.length >= 3 ? "12" : "16"),
+                "font-size": (label === "back" ? "20" : (label.length >= 3 ? "12" : "16")),
                 fill: "var(--ink)",
                 style: "pointer-events: none;" // Ensure clicks go to group
             });
@@ -542,8 +542,7 @@
 
                     pendingAnswer = s;
 
-                    // --- GIRL MATH LOGIC ---
-                    girlMathMessage = "It’s an investment ✨";
+                    pendingAnswer = s;
 
                     openModal();
                 } catch (e) {
@@ -883,15 +882,9 @@
 
             // Set custom girl math message
             const toastLines = celebrateLayer.querySelectorAll("text");
-            // Standard: "Thank you bestie! 💗" is line [0]
-            // Standard: "Answer unlocked" is line [1]
-            if (girlMathMessage) {
-                toastLines[0].textContent = girlMathMessage;
-                toastLines[1].textContent = "Math = Girled";
-            } else {
-                toastLines[0].textContent = "Thank you bestie! 💗";
-                toastLines[1].textContent = "Answer unlocked";
-            }
+            // custom text requested by user
+            toastLines[0].textContent = "Thank you for purchasing!";
+            toastLines[1].textContent = "Bawal Refund 🚫";
 
             celebrateLayer.style.display = "block";
 
