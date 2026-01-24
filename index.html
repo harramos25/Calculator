@@ -554,8 +554,28 @@
 
             // normal input, limit length to 24 (simulates scrolling)
             if (expr.length < 24) {
-                if (expr === "0" && /[0-9.]/.test(label)) expr = (label === ".") ? "0." : label;
-                else expr += label;
+                const ops = ["+", "-", "*", "/"];
+                const lastChar = expr.slice(-1);
+
+                // If input is an operator
+                if (ops.includes(label)) {
+                    // Check if last char was also an operator
+                    if (ops.includes(lastChar)) {
+                        // Replace the last operator with the new one
+                        expr = expr.slice(0, -1) + label;
+                    } else {
+                        // Append normally
+                        expr += label;
+                    }
+                } else {
+                    // Not an operator (numbers, dot, parens), append normally
+                    // Special case: Initial "0" replacement
+                    if (expr === "0" && /[0-9.]/.test(label)) {
+                        expr = (label === ".") ? "0." : label;
+                    } else {
+                        expr += label;
+                    }
+                }
             }
 
             render();
